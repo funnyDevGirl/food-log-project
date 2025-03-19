@@ -53,6 +53,7 @@ object Versions {
 	const val SECURITY_TEST = "6.4.3"
 	const val JUNIT_PLATFORM_LAUNCHER = "1.12.0"
 	const val JUNIT = "5.12.0"
+	const val JAVACRUMBS = "4.1.0"
 }
 
 dependencies {
@@ -80,8 +81,7 @@ dependencies {
 	testImplementation("org.testcontainers:testcontainers:${Versions.TESTCONTAINERS}")
 	testImplementation("org.testcontainers:junit-jupiter:${Versions.TESTCONTAINERS_JUNIT}")
 	testImplementation("org.testcontainers:postgresql:${Versions.TESTCONTAINERS}")
-
-
+	testImplementation("net.javacrumbs.json-unit:json-unit-assertj:${Versions.JAVACRUMBS}")
 }
 
 tasks.withType<Test> {
