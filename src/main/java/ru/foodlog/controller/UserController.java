@@ -32,4 +32,10 @@ public class UserController {
     public Double getDailyCalories(@PathVariable Long id) {
         return userService.getDailyCalories(id);
     }
+
+    @GetMapping(path = "/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public UserDTO getById(@PathVariable("id") Long id) {
+        return userService.getUser(id);
+    }
 }

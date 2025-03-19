@@ -13,6 +13,7 @@ import ru.foodlog.exception.UserNotFoundException;
 import ru.foodlog.mapper.UserMapper;
 import ru.foodlog.model.User;
 import ru.foodlog.repository.UserRepository;
+import ru.foodlog.service.impl.UserServiceImpl;
 import ru.foodlog.utils.SecurityUtils;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDate;
@@ -41,7 +42,7 @@ public class UserServiceTest {
     private BMRService bmrService;
 
     @InjectMocks
-    private UserService userService;
+    private UserServiceImpl userService;
 
     private UserCreateDTO userCreateDTO;
 

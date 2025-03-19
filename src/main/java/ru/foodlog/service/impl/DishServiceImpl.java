@@ -10,7 +10,6 @@ import ru.foodlog.mapper.DishMapper;
 import ru.foodlog.model.Dish;
 import ru.foodlog.repository.DishRepository;
 import ru.foodlog.service.DishService;
-
 import static java.lang.String.format;
 
 @Service
