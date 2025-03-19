@@ -13,12 +13,14 @@ import ru.foodlog.dto.users.UserCreateDTO;
 import ru.foodlog.enums.Gender;
 import ru.foodlog.enums.Purpose;
 import ru.foodlog.mapper.UserMapper;
+import ru.foodlog.model.Dish;
 import ru.foodlog.model.User;
 import ru.foodlog.repository.UserRepository;
 import ru.foodlog.utils.SecurityUtils;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import static java.lang.String.format;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -141,5 +143,28 @@ public class UserControllerTest extends BaseContext {
         mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andExpect(content().string(String.valueOf(expectedCalories)));
+    }
+
+    @Test
+    public void testGetById() throws Exception {
+        User savedUser = userRepository.save(testUser);
+
+        var request = get(URI + "/{id}", savedUser.getId());
+
+        var result = mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var body = result.getResponse().getContentAsString();
+
+        assertThatJson(body).and(
+                v -> v.node("name").isEqualTo(savedUser.getName()),
+                v -> v.node("email").isEqualTo(savedUser.getEmail()),
+                v -> v.node("age").isEqualTo(savedUser.getAge()),
+                v -> v.node("weight").isEqualTo(savedUser.getWeight()),
+                v -> v.node("height").isEqualTo(savedUser.getHeight()),
+                v -> v.node("purpose").isEqualTo(savedUser.getPurpose()),
+                v -> v.node("gender").isEqualTo(savedUser.getGender())
+        );
     }
 }
