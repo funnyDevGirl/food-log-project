@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @EnableJpaAuditing
 public class Application {
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
         SpringApplication.run(ru.foodlog.Application.class, args);
     }
 

@@ -61,8 +61,8 @@ public class BMRService {
 
         if (user.getGender() == Gender.MALE) {
             return calculateBMRForMale(user);
-        }
-        else if (user.getGender() == Gender.FEMALE) {
+
+        } else if (user.getGender() == Gender.FEMALE) {
             return calculateBMRForFemale(user);
         }
 
@@ -77,10 +77,10 @@ public class BMRService {
      */
     private double calculateBMRForMale(User user) {
 
-        return MALE_CONSTANT +
-                (MALE_WEIGHT_COEFFICIENT * user.getWeight()) +
-                (MALE_HEIGHT_COEFFICIENT * user.getHeight()) -
-                (MALE_AGE_COEFFICIENT * user.getAge());
+        return MALE_CONSTANT
+                + (MALE_WEIGHT_COEFFICIENT * user.getWeight())
+                + (MALE_HEIGHT_COEFFICIENT * user.getHeight())
+                - (MALE_AGE_COEFFICIENT * user.getAge());
     }
 
     /**
@@ -91,9 +91,9 @@ public class BMRService {
      */
     private double calculateBMRForFemale(User user) {
 
-        return FEMALE_CONSTANT +
-                (FEMALE_WEIGHT_COEFFICIENT * user.getWeight()) +
-                (FEMALE_HEIGHT_COEFFICIENT * user.getHeight()) -
-                (FEMALE_AGE_COEFFICIENT * user.getAge());
+        return FEMALE_CONSTANT
+                + (FEMALE_WEIGHT_COEFFICIENT * user.getWeight())
+                + (FEMALE_HEIGHT_COEFFICIENT * user.getHeight())
+                - (FEMALE_AGE_COEFFICIENT * user.getAge());
     }
 }

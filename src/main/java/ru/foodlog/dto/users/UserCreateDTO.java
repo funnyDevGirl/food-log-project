@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import ru.foodlog.enums.Gender;
@@ -15,6 +16,7 @@ import ru.foodlog.enums.Purpose;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class UserCreateDTO {
 
     @NotBlank
