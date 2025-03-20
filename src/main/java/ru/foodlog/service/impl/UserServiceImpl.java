@@ -31,14 +31,14 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.toUser(userCreateDTO);
         User savedUser = userRepository.save(user);
 
-        log.info("User with id '{}' successfully created", savedUser.getId());
+        log.debug("User with id '{}' successfully created", savedUser.getId());
 
         return userMapper.toUserDto(savedUser);
     }
 
     @Override
     public Double getDailyCalories(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() ->
+        User user = userRepository.findByIdWithEagerUpload(id).orElseThrow(() ->
             new UserNotFoundException(format("User with id '%s' not found", id)));
 
         return bmrService.calculateDailyCalories(user);
@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO getUser(Long id) {
-        User user = userRepository.findById(id)
+        User user = userRepository.findByIdWithEagerUpload(id)
                 .orElseThrow(() -> new UserNotFoundException(format("User with id: '%s' not found", id)));
 
         return userMapper.toUserDto(user);
