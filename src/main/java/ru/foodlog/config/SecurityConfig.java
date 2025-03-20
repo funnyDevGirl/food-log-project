@@ -30,6 +30,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/dishes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/dishes/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/meals").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/meals/**").permitAll()
                         .anyRequest().authenticated())
 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

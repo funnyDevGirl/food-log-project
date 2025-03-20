@@ -91,7 +91,7 @@ public class UserServiceTest {
     public void testGetDailyCaloriesUserFound() {
         Long userId = 1L;
         user.setId(userId);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByIdWithEagerUpload(userId)).thenReturn(Optional.of(user));
         when(bmrService.calculateDailyCalories(user)).thenReturn(2500.0);
 
         Double result = userService.getDailyCalories(userId);
@@ -99,14 +99,14 @@ public class UserServiceTest {
         assertNotNull(result);
         assertEquals(2500.0, result);
 
-        verify(userRepository).findById(userId);
+        verify(userRepository).findByIdWithEagerUpload(userId);
         verify(bmrService).calculateDailyCalories(user);
     }
 
     @Test
     public void testGetDailyCaloriesUserNotFound() {
         Long userId = 1L;
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findByIdWithEagerUpload(userId)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(UserNotFoundException.class, () -> {
             userService.getDailyCalories(userId);
@@ -114,7 +114,7 @@ public class UserServiceTest {
 
         assertTrue(exception.getMessage().contains("User with id '1' not found"));
 
-        verify(userRepository).findById(userId);
+        verify(userRepository).findByIdWithEagerUpload(userId);
     }
 
 

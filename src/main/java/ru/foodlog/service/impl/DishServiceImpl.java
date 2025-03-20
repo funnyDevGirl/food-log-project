@@ -25,14 +25,14 @@ public class DishServiceImpl implements DishService {
         Dish dish = dishMapper.toDish(dishCreateDTO);
         Dish savedDish = dishRepository.save(dish);
 
-        log.info("Dish with name '{}' successfully created", savedDish.getName());
+        log.debug("Dish with name '{}' successfully created", savedDish.getName());
 
         return dishMapper.toDishDto(savedDish);
     }
 
     @Override
     public DishDTO getDish(Long id) {
-        Dish dish = dishRepository.findById(id)
+        Dish dish = dishRepository.findByIdWithEagerUpload(id)
                 .orElseThrow(() -> new DishNotFoundException(format("Dish with id: '%s' not found", id)));
 
         return dishMapper.toDishDto(dish);

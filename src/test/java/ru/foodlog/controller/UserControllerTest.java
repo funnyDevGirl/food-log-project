@@ -13,7 +13,6 @@ import ru.foodlog.dto.users.UserCreateDTO;
 import ru.foodlog.enums.Gender;
 import ru.foodlog.enums.Purpose;
 import ru.foodlog.mapper.UserMapper;
-import ru.foodlog.model.Dish;
 import ru.foodlog.model.User;
 import ru.foodlog.repository.UserRepository;
 import ru.foodlog.utils.SecurityUtils;
@@ -77,7 +76,7 @@ public class UserControllerTest extends BaseContext {
         mockMvc.perform(request)
                 .andExpect(status().isCreated());
 
-        User user = userRepository.findByEmail(testUser.getEmail()).orElseThrow();
+        User user = userRepository.findByEmailWithEagerUpload(testUser.getEmail()).orElseThrow();
 
         assertThat(user).isNotNull();
         assertThat(user.getEmail()).isEqualTo(testUser.getEmail());

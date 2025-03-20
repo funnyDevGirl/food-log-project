@@ -61,7 +61,7 @@ class DishControllerTest extends BaseContext {
         mockMvc.perform(request)
                 .andExpect(status().isCreated());
 
-        Dish dish = dishRepository.findByName(testDish.getName()).orElseThrow();
+        Dish dish = dishRepository.findByNameWithEagerUpload(testDish.getName()).orElseThrow();
 
         assertThat(dish).isNotNull();
         assertThat(dish.getName()).isEqualTo(testDish.getName());
