@@ -12,9 +12,9 @@ public interface DishRepository extends JpaRepository<Dish, Long> {
     @Query("SELECT d FROM Dish d WHERE d.id IN :dishIds")
     Set<Dish> findByIdIn(@Param("dishIds") Set<Long> dishIds);
 
-    @Query("SELECT d FROM Dish d LEFT JOIN FETCH d.meal WHERE d.name = :name")
+    @Query("SELECT d FROM Dish d LEFT JOIN FETCH d.meals WHERE d.name = :name")
     Optional<Dish> findByNameWithEagerUpload(@Param("name") String name);
 
-    @Query("SELECT d FROM Dish d LEFT JOIN FETCH d.meal WHERE d.id = :id")
+    @Query("SELECT d FROM Dish d LEFT JOIN FETCH d.meals WHERE d.id = :id")
     Optional<Dish> findByIdWithEagerUpload(@Param("id") Long id);
 }

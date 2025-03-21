@@ -2,7 +2,6 @@ package ru.foodlog.service;
 
 import ru.foodlog.dto.meals.MealCreateDTO;
 import ru.foodlog.dto.meals.MealDTO;
-import java.util.List;
 
 public interface MealService {
 
@@ -10,5 +9,5 @@ public interface MealService {
 
     MealDTO getMeal(Long id);
 
-    List<MealDTO> getAll();
+    double getTotalCalories(Long id);
 }

@@ -2,13 +2,11 @@ package ru.foodlog.dto.dishes;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 public class DishCreateDTO {
 
     @NotBlank

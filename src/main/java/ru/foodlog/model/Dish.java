@@ -1,13 +1,13 @@
 package ru.foodlog.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -21,6 +21,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "dishes")
@@ -53,9 +55,6 @@ public class Dish {
     @Min(0)
     private double carbohydrates;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Meal meal;
-
     @CreatedDate
     @Column(name = "created_at")
     private LocalDate createdAt;
@@ -63,4 +62,17 @@ public class Dish {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDate updatedAt;
+
+    @ManyToMany(mappedBy = "dishes", cascade = CascadeType.MERGE)
+    private Set<Meal> meals = new HashSet<>();
+
+    public void addMeal(Meal meal) {
+        this.getMeals().add(meal);
+        meal.getDishes().add(this);
+    }
+
+    public void removeMeal(Meal meal) {
+        this.getMeals().remove(meal);
+        meal.getDishes().remove(this);
+    }
 }
