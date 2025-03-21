@@ -6,8 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.foodlog.container.BaseContext;
 import ru.foodlog.dto.dishes.DishCreateDTO;
@@ -24,20 +22,21 @@ import ru.foodlog.model.User;
 import ru.foodlog.repository.DishRepository;
 import ru.foodlog.repository.MealRepository;
 import ru.foodlog.repository.UserRepository;
+import ru.foodlog.service.impl.MealServiceImpl;
 import ru.foodlog.utils.SecurityUtils;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.time.LocalDate;
 import java.util.Set;
 import java.util.stream.Collectors;
-import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-public class MealControllerTest extends BaseContext {
+public class ReportControllerTest extends BaseContext  {
 
-    private static final String URI = "/api/meals";
+    private static final String URI = "/api/reports";
 
     @Autowired
     private MockMvc mockMvc;
@@ -64,11 +63,22 @@ public class MealControllerTest extends BaseContext {
     private MealRepository mealRepository;
 
     @Autowired
+    private MealServiceImpl mealService;
+
+    @Autowired
     private MealMapper mealMapper;
+
+    private User savedUser;
 
     private Meal testMeal;
 
+    private Meal testAnotherMeal;
+
     private MealCreateDTO mealCreateDTO;
+
+    private MealCreateDTO AnotherMealCreateDTO;
+
+    private LocalDate date;
 
     @BeforeEach
     public void setUp() {
@@ -77,7 +87,9 @@ public class MealControllerTest extends BaseContext {
 
         securityUtils.encryptPassword(userCreateDTO);
         User testUser = userMapper.toUser(userCreateDTO);
-        User savedUser = userRepository.save(testUser);
+        savedUser = userRepository.save(testUser);
+
+        date = LocalDate.parse("2025-03-20");
 
         DishCreateDTO dto = new DishCreateDTO();
         dto.setName("Chicken grill fillet");
@@ -101,9 +113,34 @@ public class MealControllerTest extends BaseContext {
                 .map(Dish::getId)
                 .collect(Collectors.toSet());
 
-        mealCreateDTO = new MealCreateDTO(savedUser.getId(), dishes, "For lunch", LocalDate.parse("2025-03-20"));
-
+        mealCreateDTO = new MealCreateDTO(savedUser.getId(), dishes, "For lunch", date);
         testMeal = mealMapper.toMeal(mealCreateDTO);
+
+        Meal savedMeal = mealRepository.save(testMeal);
+
+        for (long dishId : dishes){
+            Dish dish = dishRepository.findByIdWithEagerUpload(dishId).orElseThrow();
+            dish.addMeal(savedMeal);
+            dishRepository.save(dish);
+        }
+
+        Dish anotherDish = dishRepository.findByNameWithEagerUpload("Caesar with chicken").orElseThrow();
+
+        AnotherMealCreateDTO = new MealCreateDTO(savedUser.getId(), Set.of(anotherDish.getId()),
+                "For branch", date);
+        testAnotherMeal = mealMapper.toMeal(AnotherMealCreateDTO);
+
+        Meal savedAnotherMeal = mealRepository.save(testAnotherMeal);
+
+        anotherDish.addMeal(savedAnotherMeal);
+        dishRepository.save(anotherDish);
+
+        Meal m1 = mealRepository.findByIdWithEagerUpload(testMeal.getId()).orElseThrow();
+        Meal m2 = mealRepository.findByIdWithEagerUpload(testAnotherMeal.getId()).orElseThrow();
+
+        savedUser.addMeal(m1);
+        savedUser.addMeal(m2);
+        userRepository.save(savedUser);
     }
 
     @AfterEach
@@ -114,41 +151,35 @@ public class MealControllerTest extends BaseContext {
     }
 
     @Test
-    public void testCreateMeal() throws Exception {
-        var request = post(URI)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(mealCreateDTO));
+    public void testGetDailyReport() throws Exception {
+        double expectedTotalCalories =
+                mealService.getTotalCalories(testMeal.getId()) + mealService.getTotalCalories(testAnotherMeal.getId());
 
-        MockHttpServletResponse response = mockMvc.perform(request)
-                .andExpect(status().isCreated())
-                .andReturn().getResponse();
-
-        String responseBody = response.getContentAsString();
-        Meal createdMeal = objectMapper.readValue(responseBody, Meal.class);
-
-        assertThat(createdMeal.getId()).isNotNull();
-
-        Meal meal = mealRepository.findByIdWithEagerUpload(createdMeal.getId()).orElseThrow();
-
-        assertThat(meal.getUser().getId()).isEqualTo(mealCreateDTO.getUserId());
-        assertThat(meal.getMealTime()).isEqualTo(mealCreateDTO.getMealTime());
+        mockMvc.perform(get(URI + "/daily-report/{userId}/{date}", savedUser.getId(), date))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("user_id").value(savedUser.getId()))
+                .andExpect(jsonPath("number_of_meals").value(2))
+                .andExpect(jsonPath("calories").value(expectedTotalCalories));
     }
 
     @Test
-    public void testGetById() throws Exception {
-        Meal savedMeal = mealRepository.save(testMeal);
+    public void testIsUnderCaloricLimit() throws Exception {
+        var result = mockMvc.perform(get(URI + "/caloric-check/{userId}/{date}", savedUser.getId(), date))
+                .andExpect(status().isOk())
+                .andReturn();
 
-        var request = get(URI + "/{id}", savedMeal.getId());
+        var body = result.getResponse().getContentAsString();
+        assertEquals("true", body);
+    }
 
-        var result = mockMvc.perform(request)
+    @Test
+    public void testMealHistoryByDateAndUserId() throws Exception {
+        var result = mockMvc.perform(get(URI + "/meal-history/{userId}/{date}", savedUser.getId(), date))
                 .andExpect(status().isOk())
                 .andReturn();
 
         var body = result.getResponse().getContentAsString();
 
-        assertThatJson(body).and(
-                v -> v.node("mealTime").isEqualTo(savedMeal.getMealTime()),
-                v -> v.node("user_id").isEqualTo(savedMeal.getUser().getId())
-        );
+        assertThatJson(body).isArray();
     }
 }

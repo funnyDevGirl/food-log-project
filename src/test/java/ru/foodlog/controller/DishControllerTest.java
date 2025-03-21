@@ -42,7 +42,12 @@ class DishControllerTest extends BaseContext {
 
     @BeforeEach
     public void setUp() {
-        dishCreateDTO = new DishCreateDTO("Chicken fillet", 165, 31, 3.6, 0);
+        dishCreateDTO = new DishCreateDTO();
+        dishCreateDTO.setName("Chicken fillet");
+        dishCreateDTO.setCaloriesPerServing(165);
+        dishCreateDTO.setProtein(31);
+        dishCreateDTO.setFat(3.6);
+        dishCreateDTO.setCarbohydrates(0);
 
         testDish = dishMapper.toDish(dishCreateDTO);
     }

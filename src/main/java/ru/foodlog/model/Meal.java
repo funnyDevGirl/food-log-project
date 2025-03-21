@@ -1,6 +1,5 @@
 package ru.foodlog.model;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -8,8 +7,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -29,7 +28,7 @@ import java.util.Set;
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(of = {"id", "mealDate"})
 @NoArgsConstructor
 @AllArgsConstructor
 public class Meal {
@@ -42,7 +41,11 @@ public class Meal {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
+    @Column(name = "meal_time")
     private String mealTime;
+
+    @Column(name = "meal_date")
+    private LocalDate mealDate;
 
     @CreatedDate
     @Column(name = "created_at")
@@ -52,22 +55,6 @@ public class Meal {
     @Column(name = "updated_at")
     private LocalDate updatedAt;
 
-    @OneToMany(mappedBy = "meal", cascade = CascadeType.MERGE)
+    @ManyToMany
     private Set<Dish> dishes = new HashSet<>();
-
-    public void addDish(Dish dish) {
-        this.getDishes().add(dish);
-        dish.setMeal(this);
-    }
-
-    public void removeDish(Dish dish) {
-        this.getDishes().remove(dish);
-        dish.setMeal(null);
-    }
-
-    public double getTotalCalories() {
-        return dishes.stream()
-                .mapToDouble(Dish::getCaloriesPerServing)
-                .sum();
-    }
 }

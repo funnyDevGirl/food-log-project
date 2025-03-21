@@ -7,10 +7,11 @@ import ru.foodlog.dto.meals.MealCreateDTO;
 import ru.foodlog.dto.meals.MealDTO;
 import ru.foodlog.exception.MealNotFoundException;
 import ru.foodlog.mapper.MealMapper;
+import ru.foodlog.model.Dish;
 import ru.foodlog.model.Meal;
 import ru.foodlog.repository.MealRepository;
 import ru.foodlog.service.MealService;
-import java.util.List;
+import java.util.Set;
 import static java.lang.String.format;
 
 @Slf4j
@@ -40,7 +41,14 @@ public class MealServiceImpl implements MealService {
     }
 
     @Override
-    public List<MealDTO> getAll() {
-        return mealRepository.findAll().stream().map(mealMapper::toDto).toList();
+    public double getTotalCalories(Long id) {
+        Meal meal = mealRepository.findByIdWithEagerUpload(id).orElseThrow(
+                () -> new MealNotFoundException(format("Meal with id '%s' not found", id)));
+
+        Set<Dish> dishes = meal.getDishes();
+
+        return dishes.stream()
+                .mapToDouble(Dish::getCaloriesPerServing)
+                .sum();
     }
 }

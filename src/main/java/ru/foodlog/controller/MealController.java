@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.foodlog.dto.meals.MealCreateDTO;
 import ru.foodlog.dto.meals.MealDTO;
 import ru.foodlog.service.MealService;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/meals")
@@ -32,11 +31,5 @@ public class MealController {
     @ResponseStatus(HttpStatus.OK)
     public MealDTO getById(@PathVariable("id") Long id) {
         return mealService.getMeal(id);
-    }
-
-    @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public List<MealDTO> getAll() {
-        return mealService.getAll();
     }
 }
