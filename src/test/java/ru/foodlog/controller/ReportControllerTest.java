@@ -11,8 +11,6 @@ import ru.foodlog.container.BaseContext;
 import ru.foodlog.dto.dishes.DishCreateDTO;
 import ru.foodlog.dto.meals.MealCreateDTO;
 import ru.foodlog.dto.users.UserCreateDTO;
-import ru.foodlog.enums.Gender;
-import ru.foodlog.enums.Purpose;
 import ru.foodlog.mapper.DishMapper;
 import ru.foodlog.mapper.MealMapper;
 import ru.foodlog.mapper.UserMapper;
@@ -23,6 +21,7 @@ import ru.foodlog.repository.DishRepository;
 import ru.foodlog.repository.MealRepository;
 import ru.foodlog.repository.UserRepository;
 import ru.foodlog.service.impl.MealServiceImpl;
+import ru.foodlog.util.DataFactory;
 import ru.foodlog.utils.SecurityUtils;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,22 +67,19 @@ public class ReportControllerTest extends BaseContext  {
     @Autowired
     private MealMapper mealMapper;
 
+    private final DataFactory dataFactory = new DataFactory();
+
     private User savedUser;
 
     private Meal testMeal;
 
     private Meal testAnotherMeal;
 
-    private MealCreateDTO mealCreateDTO;
-
-    private MealCreateDTO AnotherMealCreateDTO;
-
     private LocalDate date;
 
     @BeforeEach
     public void setUp() {
-        UserCreateDTO userCreateDTO = new UserCreateDTO("Alina Tarasova", "test@mail.ru", "qwerty",
-                35, 55, 176, Purpose.MAINTENANCE, Gender.FEMALE);
+        UserCreateDTO userCreateDTO = dataFactory.getTestUserCreateDTO();
 
         securityUtils.encryptPassword(userCreateDTO);
         User testUser = userMapper.toUser(userCreateDTO);
@@ -91,34 +87,20 @@ public class ReportControllerTest extends BaseContext  {
 
         date = LocalDate.parse("2025-03-20");
 
-        DishCreateDTO dto = new DishCreateDTO();
-        dto.setName("Chicken grill fillet");
-        dto.setCaloriesPerServing(165);
-        dto.setProtein(31);
-        dto.setFat(3.6);
-        dto.setCarbohydrates(0);
+        Set<DishCreateDTO> dishCreateDTOs = dataFactory.getTestDishCreateDTOs();
 
-        DishCreateDTO anotherDto = new DishCreateDTO();
-        anotherDto.setName("Caesar with chicken");
-        anotherDto.setCaloriesPerServing(450);
-        anotherDto.setProtein(28);
-        anotherDto.setFat(25);
-        anotherDto.setCarbohydrates(30);
-
-        Set<DishCreateDTO> dishCreateDTOs = Set.of(dto, anotherDto);
-
-        Set<Long> dishes = dishCreateDTOs.stream()
+                Set<Long> dishes = dishCreateDTOs.stream()
                 .map(dishMapper::toDish)
                 .map(dishRepository::save)
                 .map(Dish::getId)
                 .collect(Collectors.toSet());
 
-        mealCreateDTO = new MealCreateDTO(savedUser.getId(), dishes, "For lunch", date);
+        MealCreateDTO mealCreateDTO = dataFactory.getTestMealCreateDTO(savedUser, dishes, "For lunch", date);
         testMeal = mealMapper.toMeal(mealCreateDTO);
 
         Meal savedMeal = mealRepository.save(testMeal);
 
-        for (long dishId : dishes){
+        for (long dishId : dishes) {
             Dish dish = dishRepository.findByIdWithEagerUpload(dishId).orElseThrow();
             dish.addMeal(savedMeal);
             dishRepository.save(dish);
@@ -126,9 +108,9 @@ public class ReportControllerTest extends BaseContext  {
 
         Dish anotherDish = dishRepository.findByNameWithEagerUpload("Caesar with chicken").orElseThrow();
 
-        AnotherMealCreateDTO = new MealCreateDTO(savedUser.getId(), Set.of(anotherDish.getId()),
-                "For branch", date);
-        testAnotherMeal = mealMapper.toMeal(AnotherMealCreateDTO);
+        MealCreateDTO anotherMealCreateDTO = dataFactory.getTestMealCreateDTO(savedUser,
+                Set.of(anotherDish.getId()), "For branch", date);
+        testAnotherMeal = mealMapper.toMeal(anotherMealCreateDTO);
 
         Meal savedAnotherMeal = mealRepository.save(testAnotherMeal);
 
