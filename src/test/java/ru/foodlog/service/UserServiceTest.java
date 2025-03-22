@@ -7,15 +7,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import ru.foodlog.dto.users.UserCreateDTO;
 import ru.foodlog.dto.users.UserDTO;
-import ru.foodlog.enums.Gender;
-import ru.foodlog.enums.Purpose;
 import ru.foodlog.exception.UserNotFoundException;
 import ru.foodlog.mapper.UserMapper;
 import ru.foodlog.model.User;
 import ru.foodlog.repository.UserRepository;
 import ru.foodlog.service.impl.UserServiceImpl;
+import ru.foodlog.util.DataFactory;
 import ru.foodlog.utils.SecurityUtils;
-import java.time.format.DateTimeFormatter;
 import java.time.LocalDate;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,6 +42,8 @@ public class UserServiceTest {
     @InjectMocks
     private UserServiceImpl userService;
 
+    private final DataFactory dataFactory = new DataFactory();
+
     private UserCreateDTO userCreateDTO;
 
     private User user;
@@ -55,42 +55,21 @@ public class UserServiceTest {
         MockitoAnnotations.openMocks(this);
 
         // Arrange
-        userCreateDTO = new UserCreateDTO("Alina Tarasova", "test@mail.ru", "qwerty",
-                35, 55, 176, Purpose.MAINTENANCE, Gender.FEMALE);
+        userCreateDTO = dataFactory.getTestUserCreateDTO();
 
         securityUtils.encryptPassword(userCreateDTO);
-
         String encryptedPassword = userCreateDTO.getPassword();
+
         LocalDate createdAt = LocalDate.now();
 
-        user = new User();
-        user.setId(1L);
-        user.setName("Alina Tarasova");
-        user.setEmail("test@mail.ru");
-        user.setPassword(encryptedPassword);
-        user.setGender(Gender.FEMALE);
-        user.setAge(35);
-        user.setWeight(55);
-        user.setHeight(176);
-        user.setPurpose(Purpose.MAINTENANCE);
-        user.setCreatedAt(createdAt);
+        user = dataFactory.getTestUser(userCreateDTO, encryptedPassword, createdAt);
 
-        userDTO = new UserDTO();
-        userDTO.setId(1L);
-        userDTO.setName("Alina Tarasova");
-        userDTO.setEmail("test@mail.ru");
-        userDTO.setGender(Gender.FEMALE);
-        userDTO.setAge(35);
-        userDTO.setWeight(55);
-        userDTO.setHeight(176);
-        userDTO.setPurpose(Purpose.MAINTENANCE);
-        userDTO.setCreatedAt(createdAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        userDTO = dataFactory.getTestUserDTO(createdAt);
     }
 
     @Test
     public void testGetDailyCaloriesUserFound() {
         Long userId = 1L;
-        user.setId(userId);
         when(userRepository.findByIdWithEagerUpload(userId)).thenReturn(Optional.of(user));
         when(bmrService.calculateDailyCalories(user)).thenReturn(2500.0);
 
