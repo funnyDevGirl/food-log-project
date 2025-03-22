@@ -75,6 +75,7 @@ dependencies {
 	testImplementation("org.springframework.security:spring-security-test:${Versions.SECURITY_TEST}")
 
 	// Database
+	runtimeOnly("com.h2database:h2")
 	runtimeOnly("org.postgresql:postgresql:${Versions.POSTGRESQL}")
 
 	// Testcontainers
