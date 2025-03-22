@@ -9,7 +9,7 @@ spring:
     generate-ddl: true
     show-sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop
 
   output:
     ansi:
@@ -18,6 +18,9 @@ spring:
   sql:
     init:
       mode: always
+
+    profiles:
+      default: dev
 
   http:
     encoding:
